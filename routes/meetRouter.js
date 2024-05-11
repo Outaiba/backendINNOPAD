@@ -47,4 +47,57 @@ const meet = require('../model/meet');
             }
         });
 
+    // je veux modifier une réunion en ajoutant plus de post-it  this.$axios.post(`api/meet/${this.$route.query.id}/postIt`, newPostIt)
+            meetRouter.post("/:id/postIt", async (req, res) => {
+                try {
+                    const meetId = req.params.id;
+                    const newPostIt = req.body;
+                    const foundMeet = await meet.findById(meetId);
+                    if (!foundMeet) {
+                        return res.status(404).json({ msg: "Meet not found" });
+                    }
+                    foundMeet.postIts.push(newPostIt);
+                    await foundMeet.save();
+                    res.status(201).json(foundMeet);
+                } catch (error) {
+                    console.log(error);
+                    res.status(500).json({ msg: "Server Error" });
+                }
+            });
+
+        // Modifier la position d'un post-it
+         meetRouter.put("/:id/postIt/:postItId", async (req, res) => {
+                try {
+                    const meetId = req.params.id;
+                    const postItId = req.params.postItId;
+                    const newPosition = req.body;
+                    const foundMeet = await meet.findById(meetId);
+                    if (!foundMeet) {
+                        return res.status(404).json({ msg: "Meet not found" });
+                    }
+                    const postIt = foundMeet.postIts.id(postItId);
+                    if (!postIt) {
+                        return res.status(404).json({ msg: "Post-it not found" });
+                    }
+                    postIt.position = newPosition;
+                    await foundMeet.save();
+                    res.status(200).json(foundMeet);
+                } catch (error) {
+                    console.log(error);
+                    res.status(500).json({ msg: "Server Error" });
+                }
+            });
+
+
+            // ce endpoint permet de récupérer toutes les réunions
+            meetRouter.get("/", async (req, res) => {
+                try {
+                    const meets = await meet.find();
+                    res.status(200).json(meets);
+                } catch (error) {
+                    console.log(error);
+                    res.status(500).json({ msg: "Server Error" });
+                }
+            });
+
 module.exports = meetRouter;
